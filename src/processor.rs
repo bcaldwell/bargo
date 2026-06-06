@@ -1,6 +1,6 @@
 use anyhow::{anyhow, Result};
-use std::{collections::HashMap, error::Error, fs, io::Write, path};
-use tracing::{debug, error, info, warn};
+use std::{collections::{BTreeMap, HashMap}, error::Error, fs, io::Write, path};
+use tracing::{debug, info, warn};
 
 use crate::{app_project::*, Args, Config, Metadata, TemplateContext};
 
@@ -9,7 +9,7 @@ pub struct ProjectProcessor {
     output_path: path::PathBuf,
     application_template_name: String,
     config: Config,
-    targets: HashMap<String, HashMap<String, ArgoCDProject>>,
+    targets: BTreeMap<String, BTreeMap<String, ArgoCDProject>>,
     tera: tera::Tera,
 }
 
@@ -52,7 +52,7 @@ impl ProjectProcessor {
             input_path,
             output_path,
             application_template_name: template_name,
-            targets: HashMap::new(),
+            targets: BTreeMap::new(),
             config,
             tera,
         });
@@ -68,7 +68,7 @@ impl ProjectProcessor {
             }
             fs::create_dir_all(target_dir)?;
 
-            self.targets.insert(target.name.clone(), HashMap::new());
+            self.targets.insert(target.name.clone(), BTreeMap::new());
 
             let mut merged_vars = self
                 .config
@@ -183,7 +183,9 @@ impl ProjectProcessor {
                     fs::File::create(config_dir.join(format!("{:}.yaml", project_name)))?;
 
                 file.write_all(serde_yaml::to_string(&project.project)?.as_bytes())?;
-                for app in project.applications.iter() {
+                let mut sorted_apps = project.applications.clone();
+                sorted_apps.sort();
+                for app in sorted_apps.iter() {
                     file.write_all(b"\n---\n")?;
                     file.write_all(app.as_bytes())?;
                 }

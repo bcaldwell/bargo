@@ -1,6 +1,6 @@
 use serde::Deserialize;
 use serde::Serialize;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,12 +21,12 @@ pub struct AppProjectMetadata {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AppProjectSpec {
-    pub destinations: HashSet<AppProjectDestination>,
-    pub cluster_resource_whitelist: HashSet<AppProjectClusterResourceWhitelist>,
-    pub source_repos: HashSet<String>,
+    pub destinations: BTreeSet<AppProjectDestination>,
+    pub cluster_resource_whitelist: BTreeSet<AppProjectClusterResourceWhitelist>,
+    pub source_repos: BTreeSet<String>,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, Eq, Hash)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, Eq, Hash, Ord, PartialOrd)]
 #[serde(rename_all = "camelCase")]
 pub struct AppProjectDestination {
     pub name: String,
@@ -34,7 +34,7 @@ pub struct AppProjectDestination {
     pub server: String,
 }
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, Eq, Hash)]
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize, Eq, Hash, Ord, PartialOrd)]
 #[serde(rename_all = "camelCase")]
 pub struct AppProjectClusterResourceWhitelist {
     pub group: String,
@@ -48,9 +48,9 @@ impl AppProject {
             kind: "AppProject".to_string(),
             metadata: AppProjectMetadata { name, namespace },
             spec: AppProjectSpec {
-                destinations: HashSet::new(),
-                source_repos: HashSet::new(),
-                cluster_resource_whitelist: HashSet::new(),
+                destinations: BTreeSet::new(),
+                source_repos: BTreeSet::new(),
+                cluster_resource_whitelist: BTreeSet::new(),
             },
         };
     }
